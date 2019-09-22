@@ -35,9 +35,9 @@ void loop() {
   sensorReading = analogRead(piezoSensor);
   // print the information in the Serial port (for debug)
   Serial.println(sensorReading);
-  Serial.println(lastReading);
-  Serial.println(incidencesCount);
-  Serial.println(holesCount);
+  //Serial.println(lastReading);
+  //Serial.println(incidencesCount);
+  //Serial.println(holesCount);
   // if we has been pass the incidences threashold then we have a problem...
   if (incidencesCount >= incidences)
   {
