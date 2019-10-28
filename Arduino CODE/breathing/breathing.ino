@@ -27,7 +27,7 @@ int holesCount = 0;         // variable to count false positives and false negat
 
 void setup() {
   pinMode(ledPin, OUTPUT); // declare the ledPin as as OUTPUT
-  Serial.begin(9600);       // use the serial port
+  Serial.begin(115200);       // use the serial port
 }
 
 void loop() {
