@@ -54,8 +54,9 @@ void setup(){
    
 }
 
-void Batimentos(){
-  long irValue = particleSensor.getIR();
+void loop(){
+
+    long irValue = particleSensor.getIR();
 
   if (checkForBeat(irValue) == true)
   {
@@ -89,9 +90,9 @@ void Batimentos(){
     Serial.print(" No finger?");
 
   Serial.println();
-}
 
-void Umidade(){
+  //Fim Batimento
+
   //Le o valor do pino A1 do sensor
   valor_analogico = analogRead(pino_sinal_analogico);
  
@@ -102,7 +103,7 @@ void Umidade(){
   //Solo umido, acende o led verde
   if (valor_analogico > 0 && valor_analogico < 400)
   {
-    Serial.println(" Status: Mao Umida");
+    Serial.println(" Status: Solo umido");
   }
  
   //Solo com umidade moderada, acende led amarelo
@@ -114,12 +115,11 @@ void Umidade(){
   //Solo seco, acende led vermelho
   if (valor_analogico > 800 && valor_analogico < 1024)
   {
-    Serial.println(" Status: Mao seco");
+    Serial.println(" Status: Solo seco");
   }
-  //delay(100);
-}
+  delay(100);
+  //Fim Umidade
 
-void Respiracao(){
   // read the sensor and store it in the variable sensorReading:
   sensorReading = analogRead(piezoSensor);
   // print the information in the Serial port (for debug)
@@ -128,13 +128,13 @@ void Respiracao(){
   //Serial.println(incidencesCount);
   //Serial.println(holesCount);
   // if we has been pass the incidences threashold then we have a problem...
-//  if (incidencesCount >= incidences)
-//  {
-//    Serial.println("NO BREATHING DETECTED!!!");
-//  }
-//  else {
-//    Serial.println("Breathing detected...");
-//  }
+  if (incidencesCount >= incidences)
+  {
+    Serial.println("NO BREATHING DETECTED!!!");
+  }
+  else {
+    Serial.println("Breathing detected...");
+  }
   //since this is an analog sensor, everytime that we read the sensor the value may be little diferent even if there is no activity
   if (lastReading >= sensorReading - 10  && lastReading <= sensorReading + 10)
   {
@@ -152,15 +152,7 @@ void Respiracao(){
     }
   }
   lastReading = sensorReading;
-  //delay(1000);  // delay to avoid overloading the serial port buffer
-  
-}
-
-void loop(){
-  
-  Batimentos();
-  Umidade();
-  Respiracao();
-  
+  delay(1000);  // delay to avoid overloading the serial port buffer
+  //FIm Respiração
   
 }
