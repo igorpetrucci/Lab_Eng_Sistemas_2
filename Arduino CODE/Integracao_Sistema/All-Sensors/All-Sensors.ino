@@ -1,3 +1,6 @@
+//====================DISPLAY===============================
+#include <LiquidCrystal.h>
+
 //====================BATIMENTOS===============================
 #include <Wire.h>
 #include "MAX30105.h"
@@ -10,6 +13,7 @@ long lastBeat = 0; //Time at which the last beat occurred
 
 float beatsPerMinute;
 int beatAvg;
+LiquidCrystal lcd(1, 2, 4, 5, 6, 7); // Creates an LC object. Parameters: (rs, enable, d4, d5, d6, d7) 
 
 //  Hardware Connections (Breakoutboard to Arduino):
 //  -5V = 5V (3.3V is allowed)
@@ -36,11 +40,12 @@ int incidencesCount = 0;    // variable to count how many incidences the value f
 int holesCount = 0;         // variable to count false positives and false negatives
 
 
-void setup(){
-   Serial.begin(115200);  //Serial port 
+void setup(){   
+   lcd.begin(16,2);
+   Serial.begin(9600);  //Serial port 
    pinMode(pino_sinal_analogico, INPUT); //Sensor Umidade
 
-    // Initialize sensor
+    // Initialize sensor BATIMENTO CARDIACO
     if (!particleSensor.begin(Wire, I2C_SPEED_FAST)) //Use default I2C port, 400kHz speed
     {
       Serial.println("MAX30105 was not found. Please check wiring/power. ");
@@ -51,6 +56,8 @@ void setup(){
     particleSensor.setup(); //Configure sensor with default settings
     particleSensor.setPulseAmplitudeRed(0x0A); //Turn Red LED to low to indicate sensor is running
     particleSensor.setPulseAmplitudeGreen(0); //Turn off Green LED
+
+
    
 }
 
@@ -96,34 +103,33 @@ void Umidade(){
   valor_analogico = analogRead(pino_sinal_analogico);
  
   //Mostra o valor da porta analogica no serial monitor
-  Serial.print("Porta analogica: ");
+  //Serial.print("Porta analogica: ");
   Serial.print(valor_analogico);
  
   //Solo umido, acende o led verde
-  if (valor_analogico > 0 && valor_analogico < 400)
-  {
-    Serial.println(" Status: Mao Umida");
-  }
- 
-  //Solo com umidade moderada, acende led amarelo
-  if (valor_analogico > 400 && valor_analogico < 800)
-  {
-    Serial.println(" Status: Umidade moderada");
-  }
- 
-  //Solo seco, acende led vermelho
-  if (valor_analogico > 800 && valor_analogico < 1024)
-  {
-    Serial.println(" Status: Mao seco");
-  }
+//  if (valor_analogico > 0 && valor_analogico < 400)
+//  {
+//    Serial.println(" Status: Mao Umida");
+//  }
+// 
+//  //Solo com umidade moderada, acende led amarelo
+//  if (valor_analogico > 400 && valor_analogico < 800)
+//  {
+//    Serial.println(" Status: Umidade moderada");
+//  }
+// 
+//  //Solo seco, acende led vermelho
+//  if (valor_analogico > 800 && valor_analogico < 1024)
+//  {
+//    Serial.println(" Status: Mao seco");
+//  }
   //delay(100);
 }
 
 void Respiracao(){
   // read the sensor and store it in the variable sensorReading:
   sensorReading = analogRead(piezoSensor);
-  // print the information in the Serial port (for debug)
-  Serial.println(sensorReading);
+  Serial.print(sensorReading);
   //Serial.println(lastReading);
   //Serial.println(incidencesCount);
   //Serial.println(holesCount);
@@ -156,11 +162,18 @@ void Respiracao(){
   
 }
 
+void LCD(){
+    lcd.print("TESTE");
+  delay(3000);
+  lcd.clear();
+}
+
+
 void loop(){
-  
-  Batimentos();
-  Umidade();
-  Respiracao();
+  LCD();
+  //Batimentos();
+ // Umidade();
+  //Respiracao();
   
   
 }
