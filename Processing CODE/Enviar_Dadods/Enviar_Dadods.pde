@@ -7,7 +7,7 @@ void setup(){
   println(Serial.list());
   
   //Abrir porta ultilizada pelo Arduino
-  porta = new Serial(this,Serial.list()[0],115200);
+  porta = new Serial(this,Serial.list()[0],9600);
   
   //tamanho da TELA
   size(500,500);

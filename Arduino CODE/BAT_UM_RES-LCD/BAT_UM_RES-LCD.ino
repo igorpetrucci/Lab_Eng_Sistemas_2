@@ -109,6 +109,12 @@ void loop()
 
 
   //Logica para enviar um int para o processing
-  
+  float Sensores_Pesos = 0.0;
+  Sensores_Pesos = (beatAvg*0.7367) + (valor_analogico*0.1967) + (sensorReading*0.0833);
+  Serial.print(Sensores_Pesos);
+  Serial.println();
+  lcd.setCursor(7,1);
+  lcd.print("P:");
+  lcd.print(Sensores_Pesos);
   
 }
