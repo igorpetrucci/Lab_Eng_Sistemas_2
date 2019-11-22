@@ -38,7 +38,7 @@ float beatsPerMinute;
 int beatAvg;
 int valor_analogico;
 // these variables will change:
-unsigned long int sensorReading = 0;      // variable to store the value read from the sensor pin
+unsigned int sensorReading = 0;      // variable to store the value read from the sensor pin  
 float Comparacao_superior = 0.0;
 float Comparacao_inferior = 0.0;
 float Sensores_Leitura = 0.0;
@@ -174,7 +174,7 @@ void loop()
                       case 1:
                         if(fr == false){
                            //Nesse trecho vamos inserir rotinas para imprimir no LCD
-                           mens2 = "Insira a frequencia respiratoria MAX:";
+                           mens2 = "Insira a frequencia respiratoria:";
                            Serial.println(mens2);
                           fr = true;
                         }
@@ -219,6 +219,7 @@ void loop()
 
             //IMPLEMENTAÇÃO DO RESET
             case 'A':
+            if(calibrado == true){
               calibrado = false;
               limiar = 0;
               Sensores_Leitura = 0.0;
@@ -227,13 +228,13 @@ void loop()
               beatAvg = 0;
               valor_analogico = 0;
               sensorReading = 0;
-            
+            }
             break;        
       }; //Fim do switch case menu     
 
 
     //Logica 
-    Sensores_Leitura = (beatAvg) + (valor_analogico) + (sensorReading);
+    Sensores_Leitura = (beatAvg) + (valor_analogico) + (sensorReading/2);
   //Sensores_Leitura = (beatAvg*0.7367) + (valor_analogico*0.1967) + (sensorReading*0.0833);
   //Sensores_Leitura = ((Sensores_Leitura)/(0.7367+0.1967+0.0833));
   Serial.print(Sensores_Leitura);
@@ -241,8 +242,8 @@ void loop()
 
   //LÓGICA DE PROGRAMAÇÃO
 
-  Comparacao_superior = (Sensores_Leitura*1.4); //adiciona 40% do valor da leitura
-  Comparacao_inferior = (Sensores_Leitura*0.6); //subtrai 40% do valor da leitura
+  Comparacao_superior = (Sensores_Leitura + (Sensores_Leitura*0.7)); //adiciona 70% do valor da leitura
+  Comparacao_inferior = (Sensores_Leitura - (Sensores_Leitura*0.7)); //subtrai 70% do valor da leitura
 
   if(calibrado == false ){
         lcd.setCursor(7,1);
@@ -250,11 +251,11 @@ void loop()
   }
 
   if(calibrado == true ){
-      if( limiar < Comparacao_inferior  ^ limiar > Comparacao_superior){
+      if( (Comparacao_inferior < (limiar - (limiar*0.7))) ^ (Comparacao_superior > (limiar +(limiar*0.7)))){
         lcd.setCursor(7,1);
         lcd.print("MENTIRA");
      }
-      if(Comparacao_inferior < limiar && limiar < Comparacao_superior ){
+      if(Comparacao_inferior < limiar && Comparacao_superior > limiar){
         lcd.setCursor(7,1);
         lcd.print("VERDADE");
       }
