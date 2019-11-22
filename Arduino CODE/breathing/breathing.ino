@@ -11,8 +11,8 @@
 
 
 // these constants won't change:
-const int ledPin = 13;      // led connected to digital pin 13
-const int piezoSensor = A0; // the piezo is connected to analog pin 0
+//const int ledPin = 13;      // led connected to digital pin 13
+const int piezoSensor = A1; // the piezo is connected to analog pin 0
 const int threshold = 100;  // threshold value to decide when the detected sound is a knock or not
 const int incidences = 5;
 const int holes = 2;
@@ -26,7 +26,7 @@ int incidencesCount = 0;    // variable to count how many incidences the value f
 int holesCount = 0;         // variable to count false positives and false negatives
 
 void setup() {
-  pinMode(ledPin, OUTPUT); // declare the ledPin as as OUTPUT
+  //pinMode(ledPin, OUTPUT); // declare the ledPin as as OUTPUT
   Serial.begin(115200);       // use the serial port
 }
 
@@ -41,9 +41,9 @@ void loop() {
   // if we has been pass the incidences threashold then we have a problem...
   if (incidencesCount >= incidences)
   {
-    Serial.println("NO BREATHING DETECTED!!!");
-    ledState = !ledState;
-    digitalWrite(ledPin, ledState);
+//    Serial.println("NO BREATHING DETECTED!!!");
+//    ledState = !ledState;
+//    digitalWrite(ledPin, ledState);
   }
   else {
     Serial.println("Breathing detected...");

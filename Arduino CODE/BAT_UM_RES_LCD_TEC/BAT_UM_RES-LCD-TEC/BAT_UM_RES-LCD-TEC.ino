@@ -38,7 +38,7 @@ float beatsPerMinute;
 int beatAvg;
 int valor_analogico;
 // these variables will change:
-int sensorReading = 0;      // variable to store the value read from the sensor pin
+unsigned long int sensorReading = 0;      // variable to store the value read from the sensor pin
 float Comparacao_superior = 0.0;
 float Comparacao_inferior = 0.0;
 float Sensores_Leitura = 0.0;
@@ -135,7 +135,9 @@ void loop()
   //Respiração
     // read the sensor and store it in the variable sensorReading:
   sensorReading = analogRead(piezoSensor);
-    // print the information in the Serial port (for debug)
+  // print the information in the Serial port (for debug)
+  //converte a variação do sensor de 0 a 1023 para 0 a 100
+  //sensorReading = map(sensorReading,255,10000,1000,0);
   Serial.println(sensorReading);
   Serial.println();
   lcd.setCursor(7,0);
@@ -172,7 +174,7 @@ void loop()
                       case 1:
                         if(fr == false){
                            //Nesse trecho vamos inserir rotinas para imprimir no LCD
-                           mens2 = "Insira a frequencia respiratoria:";
+                           mens2 = "Insira a frequencia respiratoria MAX:";
                            Serial.println(mens2);
                           fr = true;
                         }
@@ -239,17 +241,24 @@ void loop()
 
   //LÓGICA DE PROGRAMAÇÃO
 
-  Comparacao_superior = (Sensores_Leitura*1.4); //adicionando 40% do valor da leitura
-  Comparacao_inferior = (Sensores_Leitura*0.6); //subtraindo 40% do valor da leitura
+  Comparacao_superior = (Sensores_Leitura*1.4); //adiciona 40% do valor da leitura
+  Comparacao_inferior = (Sensores_Leitura*0.6); //subtrai 40% do valor da leitura
 
-  if( limiar < Comparacao_inferior  || limiar > Comparacao_superior){
-      lcd.setCursor(7,1);
-      lcd.print("MENTIRA");
-      delay(500);
+  if(calibrado == false ){
+        lcd.setCursor(7,1);
+        lcd.print("CALIBRA");
   }
-    if(Comparacao_inferior < limiar && limiar < Comparacao_superior ){
-      lcd.setCursor(7,1);
-      lcd.print("VERDADE");
+
+  if(calibrado == true ){
+      if( limiar < Comparacao_inferior  ^ limiar > Comparacao_superior){
+        lcd.setCursor(7,1);
+        lcd.print("MENTIRA");
+     }
+      if(Comparacao_inferior < limiar && limiar < Comparacao_superior ){
+        lcd.setCursor(7,1);
+        lcd.print("VERDADE");
+      }
   }
+
   
 }
