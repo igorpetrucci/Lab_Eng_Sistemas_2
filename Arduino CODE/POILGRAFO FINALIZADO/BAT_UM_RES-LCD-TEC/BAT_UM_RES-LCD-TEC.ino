@@ -29,7 +29,16 @@ Keypad customKeypad = Keypad( makeKeymap(hexaKeys), rowPins, colPins, ROWS, COLS
 MAX30105 particleSensor;
 LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
 
-const byte RATE_SIZE = 4; //Increase this for more averaging. 4 is good.
+//CRIAR ROTINA PARA O PIEZOELETRICO (MEDIA)
+float voltage = 0;
+float LastVoltage = 0;
+float rate = 0;
+unsigned long lastTime = 0;
+
+unsigned long dt = 100; // dt in milliseconds
+//========================================
+
+const byte RATE_SIZE = 1; //Increase this for more averaging. 4 is good.
 byte rates[RATE_SIZE]; //Array of heart rates
 byte rateSpot = 0;
 long lastBeat = 0; //Time at which the last beat occurred
@@ -38,7 +47,7 @@ float beatsPerMinute;
 int beatAvg;
 int valor_analogico;
 // these variables will change:
-unsigned int sensorReading = 0;      // variable to store the value read from the sensor pin  
+int sensorReading = 0;      // variable to store the value read from the sensor pin
 float Comparacao_superior = 0.0;
 float Comparacao_inferior = 0.0;
 float Sensores_Leitura = 0.0;
@@ -133,16 +142,38 @@ void loop()
   lcd.print(valor_analogico);
 
   //Respiração
-    // read the sensor and store it in the variable sensorReading:
-  sensorReading = analogRead(piezoSensor);
+  //ROTINA PARA IMPLEMENTAÇÃO DA MEDIA DA RESPIRAÇÃO
+  if (millis() - lastTime  >= dt)   // wait for dt milliseconds
+  {
+   lastTime = millis();
+   // read the sensor and store it in the variable sensorReading:
+   sensorReading = analogRead(piezoSensor);
+   //Converte a voltagem do sensor para ser lida
+   voltage = sensorReading * (10.0 / 1023.0); // this line changed !!
+
+   //Serial.print("SensorValue: ");
+   //Serial.println(sensorValue);
+   //Serial.print("Last voltage: ");
+   //Serial.println(LastVoltage, 4);
+   //Serial.print("Current voltage: ");
+   //Serial.println(voltage, 4 );
+
+   rate = (voltage-LastVoltage);
+   //Serial.print("dV/dt: ");
+   //Serial.println(1000*rate/dt, 4); 
+   Serial.println(); 
+
+   LastVoltage = voltage;
+  }
+
+  //===============================================
+  
   // print the information in the Serial port (for debug)
-  //converte a variação do sensor de 0 a 1023 para 0 a 100
-  //sensorReading = map(sensorReading,255,10000,1000,0);
-  Serial.println(sensorReading);
+  Serial.println(voltage);
   Serial.println();
   lcd.setCursor(7,0);
   lcd.print("R:");
-  lcd.print(sensorReading);
+  lcd.print(voltage);
   
   //TECLADO ROTINA
         char key = customKeypad.getKey();
@@ -174,7 +205,7 @@ void loop()
                       case 1:
                         if(fr == false){
                            //Nesse trecho vamos inserir rotinas para imprimir no LCD
-                           mens2 = "Insira a frequencia respiratoria:";
+                           mens2 = "Insira a umidade:";
                            Serial.println(mens2);
                           fr = true;
                         }
@@ -183,7 +214,7 @@ void loop()
                       case 2:
                          if(um == false){
                            //Nesse trecho vamos inserir rotinas para imprimir no LCD
-                           mens2 = "Insira o valor de umidade:";
+                           mens2 = "Insira o valor de respiracao:";
                            Serial.println(mens2);
                            um = true;
                         }
@@ -196,7 +227,7 @@ void loop()
                       }
                   
                       if (key !=NO_KEY && key == '*'){
-                         res_fis_inc[k] = num1.toInt(); //Converte para interiro
+                         res_fis_inc[k] = num1.toInt(); //Converte para inteiro
                          Serial.println(res_fis_inc[k]);
                          k++;
                          num1 = "";
@@ -221,6 +252,9 @@ void loop()
             case 'A':
             if(calibrado == true){
               calibrado = false;
+              res_fis_inc[0] = 0;
+              res_fis_inc[1] = 0;
+              res_fis_inc[2] = 0;  
               limiar = 0;
               Sensores_Leitura = 0.0;
               Comparacao_superior = 0.0;
@@ -228,13 +262,14 @@ void loop()
               beatAvg = 0;
               valor_analogico = 0;
               sensorReading = 0;
+              lcd.clear();
             }
             break;        
       }; //Fim do switch case menu     
 
 
     //Logica 
-    Sensores_Leitura = (beatAvg) + (valor_analogico) + (sensorReading/6);
+  // Sensores_Leitura = (beatAvg) + (valor_analogico);
   //Sensores_Leitura = (beatAvg*0.7367) + (valor_analogico*0.1967) + (sensorReading*0.0833);
   //Sensores_Leitura = ((Sensores_Leitura)/(0.7367+0.1967+0.0833));
   Serial.print(Sensores_Leitura);
@@ -242,24 +277,28 @@ void loop()
 
   //LÓGICA DE PROGRAMAÇÃO
 
-  Comparacao_superior = (Sensores_Leitura + (Sensores_Leitura*0.4)); //adiciona 40% do valor da leitura
-  Comparacao_inferior = (Sensores_Leitura - (Sensores_Leitura*0.4)); //subtrai 40% do valor da leitura
-
+//  Comparacao_superior = (Sensores_Leitura*1.4); //adicionando 40% do valor da leitura
+//  Comparacao_inferior = (Sensores_Leitura*0.6); //subtraindo 40% do valor da leitura
+  
   if(calibrado == false ){
         lcd.setCursor(7,1);
         lcd.print("CALIBRA");
   }
 
+  //A lógico sempre se baseia pelo valor máximo de cada sensor (frequencia cardiaca = media, sensor respiração = valor de comparação (ex)80 [varia de 0 a 100]
+  //umidade = valor da umidade real da mão)
+  //res_fis_inc[0] -> frequencia cardiaca
+  //res_fis_inc[1] -> umidade
+  //res_fis_inc[2] -> respiracao
   if(calibrado == true ){
-      if( (Comparacao_inferior < (limiar - (limiar*0.7))) ^ (Comparacao_superior > (limiar +(limiar*0.7)))){
+      if( ((voltage*1.1) > res_fis_inc[2]) ^ ((valor_analogico*1.1) > res_fis_inc[1]) ^ ((beatAvg*1.1) > res_fis_inc[0]) ) {
         lcd.setCursor(7,1);
         lcd.print("MENTIRA");
+        delay(500);
      }
-      if(Comparacao_inferior < limiar && Comparacao_superior < limiar){
+      if( ((((voltage-(voltage*0.1)) < res_fis_inc[2] ) && (res_fis_inc[2] > (voltage+(voltage*0.1))))) &&  ((((valor_analogico-(valor_analogico*0.1)) < res_fis_inc[1] ) && (res_fis_inc[1] > (valor_analogico+(valor_analogico*0.1)))))  &&  ((((beatAvg-(beatAvg*0.1)) < res_fis_inc[0] ) && (res_fis_inc[0] > (beatAvg+(beatAvg*0.1)))))  ) {
         lcd.setCursor(7,1);
         lcd.print("VERDADE");
       }
   }
-
-  
 }
